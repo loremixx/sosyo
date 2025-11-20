@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocioSample | Akademik Örneklem Hesaplayıcı</title>
+    <style>
+        /* Sitenin Görsel Tasarımı (CSS) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            border-top: 6px solid #2c3e50; /* Akademik Lacivert */
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Kutunun taşmasını engeller */
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #34495e;
+        }
+        
+        /* Sonuç Alanı Tasarımı */
+        #result-area {
+            display: none; /* Başlangıçta gizli */
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px dashed #bdc3c7;
+        }
+        .result-box {
+            background-color: #eaf2f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .result-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2980b9;
+            display: block;
+        }
+        .academic-text {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            font-family: 'Times New Roman', Times, serif; /* Tez fontu */
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            border-radius: 6px;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #219150;
+        }
+        .info {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            margin-top: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SocioSample</h1>
+        <p class="subtitle">Sosyolojik Araştırmalar İçin Örneklem Hesaplama Aracı</p>
+
+        <div class="form-group">
+            <label for="population">Evren Büyüklüğü (N)</label>
+            <input type="number" id="population" placeholder="Örn: 10000" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="confidence">Güven Aralığı (Confidence Level)</label>
+            <select id="confidence">
+                <option value="1.96" selected>%95 (Standart)</option>
+                <option value="2.58">%99 (Hassas)</option>
+                <option value="1.65">%90 (Düşük)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="error">Hata Payı (Margin of Error)</label>
+            <select id="error">
+                <option value="0.05" selected>%5 (Standart)</option>
+                <option value="0.03">%3 (Hassas)</option>
+                <option value="0.10">%10 (Geniş)</option>
+            </select>
+        </div>
+
+        <button onclick="calculateSample()">Örneklemi Hesapla</button>
+
+        <div id="result-area">
+            <div class="result-box">
+                <span>Görüşülmesi Gereken Kişi Sayısı:</span>
+                <span class="result-number" id="final-number">0</span>
+            </div>
+
+            <label>Tez/Rapor İçin Akademik Metin:</label>
+            <div class="academic-text" id="thesis-text">
+                </div>
+            <button class="copy-btn" onclick="copyText()">Metni Kopyala</button>
+        </div>
+        
+        <div class="info">
+            Hesaplama Cochran (1977) formülü kullanılarak yapılmıştır.<br>
+            p=0.5 (Maksimum heterojenlik varsayımı).
+        </div>
+    </div>
+
+    <script>
+        /* Sitenin Beyni (JavaScript) */
+        function calculateSample() {
+            // Girdileri al
+            const N = document.getElementById('population').value; // Evren
+            const Z = parseFloat(document.getElementById('confidence').value); // Z değeri
+            const e = parseFloat(document.getElementById('error').value); // Hata payı
+            const p = 0.5; // Heterojenlik (Standart 0.5 alınır)
+
+            // Boş alan kontrolü
+            if (N === "" || N <= 0) {
+                alert("Lütfen geçerli bir evren büyüklüğü giriniz.");
+                return;
+            }
+
+            // Cochran Formülü (Sonlu Evren Düzeltmeli)
+            // n0 = (Z^2 * p * q) / e^2
+            const numerator = (Math.pow(Z, 2) * p * (1 - p)) / Math.pow(e, 2);
+            
+            // n = n0 / (1 + (n0 - 1) / N)
+            const sampleSize = numerator / (1 + ((numerator - 1) / N));
+            
+            // Sonucu yukarı yuvarla (İnsan yarım olamaz)
+            const finalResult = Math.ceil(sampleSize);
+
+            // Sonuçları ekrana yaz
+            document.getElementById('final-number').innerText = finalResult;
+
+            // Akademik metni oluştur
+            const confidenceText = document.getElementById('confidence').options[document.getElementById('confidence').selectedIndex].text;
+            const errorText = document.getElementById('error').options[document.getElementById('error').selectedIndex].text;
+            
+            const text = `Bu araştırmanın evreni ${N} birimden oluşmaktadır. Evrenin heterojen yapıda olduğu varsayılarak (p=0.5), ${confidenceText} güven düzeyinde ve ${errorText} hata payı ile yapılan güç analizi sonucunda, evreni temsil edecek minimum örneklem büyüklüğü ${finalResult} olarak hesaplanmıştır. Hesaplamada sonlu evren düzeltmesi uygulanmıştır (Cochran, 1977).`;
+
+            document.getElementById('thesis-text').innerText = text;
+
+            // Sonuç alanını görünür yap
+            document.getElementById('result-area').style.display = "block";
+        }
+
+        // Metni Kopyalama Fonksiyonu
+        function copyText() {
+            const text = document.getElementById('thesis-text').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Akademik metin kopyalandı! Tez dosyanıza yapıştırabilirsiniz.");
+            });
+        }
+    </script>
+
+</body>
+</html>
