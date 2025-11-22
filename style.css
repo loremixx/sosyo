@@ -1,0 +1,270 @@
+:root {
+    /* Renk Paleti */
+    --bg-dark: #0f172a;
+    --bg-panel: rgba(30, 41, 59, 0.75); /* Yarı saydam */
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --border: rgba(255, 255, 255, 0.08);
+    
+    /* Grup Renkleri */
+    --c-erken: #ef4444;
+    --c-akademi: #f59e0b;
+    --c-monografi: #10b981;
+    --c-teorik: #8b5cf6;
+    --c-kultur: #ec4899;
+    --c-tema: #3b82f6;
+    --c-kurum: #64748b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow: hidden; /* Sayfa kaymasını engelle */
+}
+
+/* Ana Düzen */
+.app-container {
+    display: grid;
+    grid-template-columns: 1fr 360px; /* Harita geniş, panel sabit */
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+/* Harita Alanı */
+.map-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+}
+
+#cy {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    /* Grafik çıkmama sorununu çözen kilit nokta: Absolute positioning */
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    z-index: 0;
+}
+
+/* Sidebar (Glassmorphism) */
+.sidebar {
+    background: var(--bg-panel);
+    backdrop-filter: blur(12px); /* Buzlu cam efekti */
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Arama Kutusu */
+.search-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.search-box input:focus {
+    border-color: var(--accent);
+    background: rgba(0,0,0,0.5);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+    font-size: 14px;
+}
+
+/* Bilgi Kartları */
+.info-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.info-card.hidden { display: none; }
+.info-card.empty { border-style: dashed; opacity: 0.6; text-align: center; font-size: 13px; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+
+.card-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--accent);
+    border-radius: 10px;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.meta-text {
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.body-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #cbd5e1;
+}
+
+/* Filtre Listesi */
+.filters-section h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.filter-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Butonlar */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; /* En alta it */
+    padding-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn.primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn.secondary {
+    background: #334155;
+    color: var(--text-main);
+}
+
+.sidebar-footer {
+    margin-top: 15px;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* Responsive: Mobil Görünüm */
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+    
+    .sidebar {
+        height: 40vh;
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+
+    .map-area {
+        height: 60vh;
+    }
+}
