@@ -3,434 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Türkiye Sosyoloji Tarihi | Genişletilmiş Dijital Harita</title>
+    <title>Türkiye Sosyoloji Atlası </title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="style.css">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
-
-    <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --border: rgba(255,255,255,0.08);
-            --muted: #94a3b8;
-            --text-main: #f1f5f9;
-            --accent: #6366f1;
-        }
-
-        * { box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); overflow: hidden; }
-
-        .app { display: grid; grid-template-columns: 1fr 380px; height: 100vh; }
-        
-        /* Harita Alanı */
-        .map-container { position: relative; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); overflow: hidden; }
-        #cy { width: 100%; height: 100%; display: block; }
-
-        /* Sağ Panel */
-        .panel {
-            background: var(--panel);
-            border-left: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            padding: 24px;
-            overflow-y: auto;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-
-        h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px 0; letter-spacing: -0.5px; color: #fff; }
-        .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); line-height: 1.5; }
-
-        /* Arama */
-        .controls { margin-bottom: 20px; }
-        input[type=text] {
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-            background: rgba(0,0,0,0.2); color: inherit; outline: none; transition: 0.2s; font-size: 14px;
-        }
-        input[type=text]:focus { border-color: var(--accent); background: rgba(0,0,0,0.4); }
-
-        /* Bilgi Kartı */
-        .node-card {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-            padding: 20px; border-radius: 12px; margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        #card-title { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-        #card-meta { font-size: 13px; color: var(--accent); margin-bottom: 12px; font-weight: 500; display: flex; gap: 10px; align-items: center; }
-        #card-body { font-size: 14px; line-height: 1.6; color: #cbd5e1; }
-
-        /* Legend & Filtreler */
-        .filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: auto; }
-        .filter-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 15px 0 8px 0; font-weight: 700; }
-        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #cbd5e1; cursor: pointer; padding: 4px 0; }
-        .legend-item:hover { color: #fff; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-        
-        /* Butonlar */
-        .actions { display: flex; gap: 10px; margin-top: 20px; pt: 20px; border-top: 1px solid var(--border); }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-secondary { background: #334155; color: #e2e8f0; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .app { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-            .panel { height: 45vh; border-left: 0; border-top: 1px solid var(--border); }
-        }
-    </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="map-container">
-        <div id="cy"></div>
+    <div class="app-container">
+        <main class="map-area">
+            <div id="cy"></div>
+            <div class="loading-overlay" id="loading">Harita Yükleniyor...</div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Sosyoloji Atlası</h1>
+                <p class="subtitle">Dönemler, Şahıslar ve İlişkiler</p>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Kişi veya kavram ara..." autocomplete="off">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div id="node-card" class="info-card hidden">
+                <div class="card-header">
+                    <h2 id="card-title">Başlık</h2>
+                    <span id="card-badge" class="badge">Dönem</span>
+                </div>
+                <div id="card-meta" class="meta-text">Yıl / Bilgi</div>
+                <div id="card-body" class="body-text">
+                    Açıklama metni buraya gelecek.
+                </div>
+            </div>
+
+            <div id="empty-state" class="info-card empty">
+                <p>Detaylarını görmek için haritadaki bir düğüme tıklayın.</p>
+            </div>
+
+            <div class="filters-section">
+                <h3>Filtreler ve Dönemler</h3>
+                <div class="filter-list">
+                    <div class="filter-item" data-group="Erken">
+                        <span class="dot" style="background:var(--c-erken)"></span>Erken Dönem
+                    </div>
+                    <div class="filter-item" data-group="Akademi">
+                        <span class="dot" style="background:var(--c-akademi)"></span>Akademi & Kurum
+                    </div>
+                    <div class="filter-item" data-group="Monografi">
+                        <span class="dot" style="background:var(--c-monografi)"></span>Monografi (1940-60)
+                    </div>
+                    <div class="filter-item" data-group="Teorik">
+                        <span class="dot" style="background:var(--c-teorik)"></span>Teorik/Tarihsel (60-80)
+                    </div>
+                    <div class="filter-item" data-group="Kultur">
+                        <span class="dot" style="background:var(--c-kultur)"></span>Kültür & Din
+                    </div>
+                    <div class="filter-item" data-group="Tema">
+                        <span class="dot" style="background:var(--c-tema)"></span>Temel Kavramlar
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="reset-btn" class="btn secondary">Sıfırla</button>
+                <button id="fit-btn" class="btn primary">Odakla</button>
+            </div>
+
+            <footer class="sidebar-footer">
+                Kaynak: Türk Sosyolojisinin Kısa Tarihi (M. [span_0](start_span)Cem Şahin)[span_0](end_span)
+            </footer>
+        </aside>
     </div>
 
-    <div class="panel">
-        <h1>Türk Sosyolojisi Atlası</h1>
-        <div class="subtitle">
-            Dönemler, Şahıslar ve Ana Yönelimler<br>
-            <span style="font-size:11px; opacity:0.7">Kaynak: M. Cem Şahin, "Türk Sosyolojisinin Kısa Tarihi"</span>
-        </div>
-
-        <div class="controls">
-            <input id="search" type="text" placeholder="İsim, eser veya kavram ara..." autocomplete="off" />
-        </div>
-
-        <div id="card" class="node-card">
-            <div id="card-title">Keşfetmek için tıklayın</div>
-            <div id="card-meta">Seçili öge yok</div>
-            <div id="card-body">Haritadaki düğümlere tıklayarak sosyologların biyografilerini, temel tezlerini ve birbirleriyle olan entelektüel ilişkilerini görüntüleyebilirsiniz.</div>
-        </div>
-
-        <div class="filters">
-            <div class="filter-title">Dönemler ve Akımlar</div>
-            <div class="legend-item" onclick="filterBy('Erken')"><span class="dot" style="background:#ef4444"></span>Erken Dönem (1900-1940)</div>
-            <div class="legend-item" onclick="filterBy('Akademi')"><span class="dot" style="background:#f59e0b"></span>Üniversite & Kurumsallaşma</div>
-            <div class="legend-item" onclick="filterBy('Monografi')"><span class="dot" style="background:#10b981"></span>Köy Monografileri & Saha (1940-60)</div>
-            <div class="legend-item" onclick="filterBy('Teorik')"><span class="dot" style="background:#8b5cf6"></span>Metodoloji & Tarihsel Sosyoloji (1960-80)</div>
-            <div class="legend-item" onclick="filterBy('Kültür')"><span class="dot" style="background:#ec4899"></span>Kültür, Din ve Zihniyet</div>
-            <div class="legend-item" onclick="filterBy('Kurum')"><span class="dot" style="background:#64748b"></span>Kurum & Dergi</div>
-        </div>
-
-        <div class="actions">
-            <button id="resetBtn" class="btn btn-secondary">Haritayı Sıfırla</button>
-            <button id="fitBtn" class="btn btn-primary">Merkeze Odakla</button>
-        </div>
-    </div>
-</div>
-
-<script>
-/* VERİ KAYNAĞI ÖZETİ:
-   Bu veri seti, kullanıcı tarafından sağlanan "trk-sosyolojisinin-ksa-tarihi-dnemler-ahslar-ve.pdf" 
-   dosyasındaki bilgiler esas alınarak yapılandırılmıştır. 
-   Alıntılar formatında kod içinde not edilmiştir.
-*/
-
-const DATA = {
-    nodes: [
-        // --- 1. ERKEN DÖNEM & KURUCULAR ---
-        { id: 'ziyag', label: 'Ziya Gökalp', group: 'Erken', year: '1876–1924', 
-          bio: 'Türk sosyolojisinin kurucusu ve ilk kürsü sahibi (1914). Durkheim ekolünü benimsedi. [span_0](start_span)[span_1](start_span)[span_2](start_span)"Türkleşmek, İslamlaşmak, Muasırlaşmak" formülüyle ulus-devlet inşasında ideolog rolü oynadı.[span_0](end_span)[span_1](end_span)[span_2](end_span)' },
-        
-        { id: 'psabahattin', label: 'Prens Sabahattin', group: 'Erken', year: '1879–1948', 
-          bio: 'Le Play ekolü ve "Science Sociale" temsilcisi. Merkeziyetçiliğe karşı "Adem-i Merkeziyet" ve "Teşebbüs-ü Şahsi"yi savundu. [span_3](start_span)[span_4](start_span)Liberal sosyolojinin öncüsü.[span_3](end_span)[span_4](end_span)' },
-        
-        { id: 'mizzet', label: 'Mehmet İzzet', group: 'Erken', year: '1891–1930', 
-          bio: 'Felsefe ve sosyolojiyi sentezledi. Alman idealizminin etkisinde kaldı. [span_5](start_span)[span_6](start_span)Milliyetçiliği bir "ideal" ve dayanışma bağı olarak yorumladı, ırkçı teorileri eleştirdi.[span_5](end_span)[span_6](end_span)' },
-
-        { id: 'servet', label: 'Servet-i Fünun Çevresi', group: 'Erken', year: '1900s', 
-          bio: 'Ahmet Şuayb, Mehmet Cavit, Rıza Tevfik gibi isimler. Sosyolojiyi edebiyat ve fikir dergileri üzerinden Türkiye\'ye taşıdılar. [span_7](start_span)[span_8](start_span)İlk dergi: Ulum-i İktisadiyye ve İçtimaiyye.[span_7](end_span)[span_8](end_span)' },
-
-        // --- 2. AKADEMİK KURUMSALLAŞMA & İLK KUŞAK ---
-        { id: 'hzu', label: 'Hilmi Ziya Ülken', group: 'Akademi', year: '1901–1974', 
-          bio: 'Türk düşünce tarihinin en velüd (üretken) ismi. "Aşk Ahlakı" ve "Türkiye\'de Çağdaş Düşünce Tarihi" eserleri temeldir. [span_9](start_span)[span_10](start_span)1940\'lardaki durgunluğu eserleriyle aştı.[span_9](end_span)[span_10](end_span)' },
-        
-        { id: 'zff', label: 'Z.F. Fındıkoğlu', group: 'Akademi', year: '1899–1974', 
-          bio: 'İstanbul Üniversitesi ekolü. Hukuk sosyolojisi ve folklor çalışmaları yaptı. "İş ve Düşünce" dergisini çıkardı. [span_11](start_span)[span_12](start_span)Kooperasyon sosyolojisine önem verdi.[span_11](end_span)[span_12](end_span)' },
-
-        // --- 3. MONOGRAFİLER & SAHA ÇALIŞMALARI (ANKARA EKOLÜ) ---
-        { id: 'berkes', label: 'Niyazi Berkes', group: 'Monografi', year: '1908–1988', 
-          bio: 'DTCF Ekolü. "Türkiye\'de Çağdaşlaşma" başyapıtıdır. 1942\'de "Ankara Köyleri" araştırmasıyla saha çalışması geleneğini başlattı. [span_13](start_span)[span_14](start_span)Sekülerleşme ve tarihsel gelişim üzerine çalıştı.[span_13](end_span)[span_14](end_span)' },
-
-        { id: 'boran', label: 'Behice Boran', group: 'Monografi', year: '1910–1987', 
-          bio: 'DTCF Ekolü. Marksist sosyolog. Manisa köyleri üzerine saha çalışmasıyla toplumsal yapı ve sınıf analizini birleştirdi. [span_15](start_span)[span_16](start_span)[span_17](start_span)1947 tasfiyesiyle üniversiteden uzaklaştırıldı.[span_15](end_span)[span_16](end_span)[span_17](end_span)' },
-        
-        { id: 'iyasa', label: 'İbrahim Yasa', group: 'Monografi', year: '1950s', 
-          bio: 'Hasanoğlan ve Sindel köyü monografileriyle tanınır. [span_18](start_span)Aile yapısı ve toplumsal değişme üzerine ampirik veriler topladı.[span_18](end_span)' },
-
-        { id: 'mturhan', label: 'Mümtaz Turhan', group: 'Monografi', year: '1908–1969', 
-          bio: 'Sosyal Psikoloji yaklaşımı. "Garplılaşmanın Neresindeyiz?" eseriyle tanınır. Kültür değişmeleri üzerine odaklandı. [span_19](start_span)[span_20](start_span)Batılılaşmayı zorunlu tek seçenek olarak gördü.[span_19](end_span)[span_20](end_span)' },
-
-        // --- 4. TEORİK AYRIŞMA & TARİHSEL SOSYOLOJİ (1960-80) ---
-        { id: 'bsezer', label: 'Baykan Sezer', group: 'Teorik', year: '1939–1996', 
-          bio: 'Batı merkezli tarih tezlerine (özellikle ATÜT) karşı çıktı. [span_21](start_span)[span_22](start_span)Osmanlı\'yı "Doğu-Batı çatışması" ekseninde, kendine özgü bir "Bozkır Devleti" olarak tanımladı.[span_21](end_span)[span_22](end_span)' },
-
-        { id: 'smardin', label: 'Şerif Mardin', group: 'Teorik', year: '1927–2017', 
-          bio: '"Merkez-Çevre" kuramı. Türk modernleşmesinin dinamiğini, din ve ideoloji ilişkisini Weberci bir perspektifle inceledi. [span_23](start_span)[span_24](start_span)"Din ve İdeoloji", "Bediüzzaman Olayı".[span_23](end_span)[span_24](end_span)' },
-
-        { id: 'mkiray', label: 'Mübeccel Kıray', group: 'Teorik', year: '1923–2007', 
-          bio: '"Tampon Kurumlar" teorisi. Ereğli ağır sanayi araştırması. [span_25](start_span)[span_26](start_span)Feodal yapıdan sanayi toplumuna geçişte kentin ve mekânın dönüşümünü inceledi.[span_25](end_span)[span_26](end_span)' },
-
-        { id: 'cmeric', label: 'Cemil Meriç', group: 'Teorik', year: '1916–1987', 
-          bio: 'Sosyolojiye eleştirel yaklaşım. "Bu Ülke". Batı sosyolojisinin bir ideoloji olduğunu savundu. Saint-Simon üzerine çalıştı. [span_27](start_span)[span_28](start_span)"İrfan" kavramını öne çıkardı.[span_27](end_span)[span_28](end_span)' },
-        
-        { id: 'oturkdogan', label: 'Orhan Türkdoğan', group: 'Teorik', year: '1928–', 
-          bio: 'Köy sosyolojisi ve gecekondu çalışmaları. [span_29](start_span)[span_30](start_span)Gecekonduları "yoksulluk kültürü" ve "ulusallaşamama" sorunu olarak ele aldı.[span_29](end_span)[span_30](end_span)' },
-
-        // --- 5. KÜLTÜR, ZİHNİYET VE DİN ---
-        { id: 'sulgener', label: 'Sabri F. Ülgener', group: 'Kültür', year: '1911–1983', 
-          bio: 'Max Weber\'in "anlayıcı" yöntemini Türkiye\'ye uyguladı. [span_31](start_span)[span_32](start_span)"Zihniyet ve Din" eseriyle Osmanlı\'nın ekonomik geriliğini "Pasif-Zahit" zihniyet kodlarında aradı.[span_31](end_span)[span_32](end_span)' },
-
-        { id: 'egungor', label: 'Erol Güngör', group: 'Kültür', year: '1938–1983', 
-          bio: 'Sosyal psikolog ve sosyolog. Dini, kültürün ve kimliğin merkezi bir ögesi olarak gördü. [span_33](start_span)[span_34](start_span)Aydınlar ile halk arasındaki yabancılaşmayı inceledi.[span_33](end_span)[span_34](end_span)' },
-
-        { id: 'abilgiseven', label: 'Amiran K. Bilgiseven', group: 'Kültür', year: '1926–2005', 
-          bio: 'Din sosyolojisi çalışmaları. "Tevhit" kavramını sosyolojik birleştirici bir ilke olarak ele aldı. [span_35](start_span)[span_36](start_span)İnanç tabakaları analizi yaptı.[span_35](end_span)[span_36](end_span)' },
-        
-        { id: 'meroz', label: 'Mehmet Eröz', group: 'Kültür', year: '1930–1986', 
-          bio: 'Türk kültürü ve Yörükler üzerine saha çalışmaları. [span_37](start_span)[span_38](start_span)Alevilik-Bektaşilik konusunu Türk kültürü ve İslam tasavvufu bağlamında sosyolojik olarak inceledi.[span_37](end_span)[span_38](end_span)' },
-
-        // --- 6. KURUMLAR VE TEMALAR ---
-        { id: 'iu', label: 'İstanbul Üni. (Darülfünun)[span_39](start_span)', group: 'Kurum', bio: '1914\'te Ziya Gökalp ile ilk sosyoloji kürsüsü burada kuruldu.[span_39](end_span)' },
-        { id: 'dtcf', label: 'Ankara DTCF', group: 'Kurum', bio: '1930\'ların sonu ve 40\'larda saha araştırmalarının ve eleştirel sosyolojinin merkezi oldu. [span_40](start_span)[span_41](start_span)1947 tasfiyesiyle darbe aldı.[span_40](end_span)[span_41](end_span)' },
-        [span_42](start_span)[span_43](start_span){ id: 'dergi1', label: 'İçtimaiyat Mecmuası', group: 'Kurum', bio: '1917\'de Ziya Gökalp yönetiminde çıkan ilk akademik sosyoloji dergisi.[span_42](end_span)[span_43](end_span)' },
-        { id: 'dergi2', label: 'İş ve Düşünce', group: 'Kurum', bio: 'Z.F. [span_44](start_span)Fındıkoğlu tarafından 1934\'te çıkarılmaya başlanan önemli dergi.[span_44](end_span)' },
-
-        // --- TEMATİK DÜĞÜMLER (HUB) ---
-        { id: 't_modern', label: 'Modernleşme / Batılılaşma', group: 'Tema', bio: 'Osmanlı\'dan günümüze ana eksen.' },
-        { id: 't_din', label: 'Din ve Toplum', group: 'Tema', bio: 'Laiklik, tarikatlar, Alevilik ve İslami hareketler.' },
-        { id: 't_koy', label: 'Köy / Toplumsal Yapı', group: 'Tema', bio: 'Köy monografileri, feodalite tartışmaları, ATÜT.' },
-        { id: 't_kent', label: 'Kentleşme / Gecekondu', group: 'Tema', bio: 'Göç, gecekondu, tampon kurumlar.' },
-    ],
-    edges: [
-        // Ziya Gökalp
-        { source: 'ziyag', target: 'iu', rel: 'Kurucu' },
-        { source: 'ziyag', target: 'dergi1', rel: 'Yönetici' },
-        { source: 'ziyag', target: 't_modern', rel: 'Teorisyen' },
-        
-        // Prens Sabahattin
-        { source: 'psabahattin', target: 'ziyag', rel: 'Fikri Rakip' },
-        { source: 'psabahattin', target: 't_koy', rel: 'Science Sociale' },
-
-        // Mehmet İzzet & Hilmi Ziya
-        { source: 'mizzet', target: 'ziyag', rel: 'Öğrenci' },
-        { source: 'hzu', target: 'mizzet', rel: 'Etkilendi' },
-        { source: 'hzu', target: 'iu', rel: 'Profesör' },
-        
-        // DTCF Grubu
-        { source: 'berkes', target: 'dtcf', rel: 'Akademisyen' },
-        { source: 'boran', target: 'dtcf', rel: 'Akademisyen' },
-        { source: 'boran', target: 't_koy', rel: 'Saha Çalışması' },
-        { source: 'berkes', target: 't_modern', rel: 'Çağdaşlaşma Tarihi' },
-        { source: 'iyasa', target: 't_koy', rel: 'Monografi' },
-
-        // 1950-60 Grubu
-        { source: 'mturhan', target: 't_modern', rel: 'Batılılaşma Savunusu' },
-        { source: 'zff', target: 'dergi2', rel: 'Kurucu' },
-
-        // 1960-80 Grubu (Teorik & Kültürel)
-        { source: 'mkiray', target: 't_kent', rel: 'Tampon Kurumlar' },
-        { source: 'smardin', target: 't_din', rel: 'Din ve İdeoloji' },
-        { source: 'smardin', target: 'berkes', rel: 'Eleştirel Diyalog' }, // Berkes'in yaklaşımını geliştirdi/eleştirdi
-        
-        // Baykan Sezer & Tarihsel Sosyoloji
-        { source: 'bsezer', target: 't_koy', rel: 'ATÜT Eleştirisi' },
-        { source: 'bsezer', target: 'smardin', rel: 'Dönemdaş' },
-
-        // Kültürelciler
-        { source: 'sulgener', target: 't_din', rel: 'Zihniyet Analizi' },
-        { source: 'egungor', target: 't_modern', rel: 'Kültür Milliyetçiliği' },
-        { source: 'egungor', target: 'mturhan', rel: 'Asistanı/Öğrencisi' }, // Önemli bir bağ
-        { source: 'meroz', target: 't_din', rel: 'Alevilik Çalışmaları' },
-        { source: 'abilgiseven', target: 't_din', rel: 'Din Sosyolojisi' },
-
-        // Cemil Meriç (Dışarıdan Eleştiri)
-        { source: 'cmeric', target: 't_modern', rel: 'Batı Eleştirisi' },
-        
-        // Orhan Türkdoğan
-        { source: 'oturkdogan', target: 't_kent', rel: 'Gecekondu Kültürü' },
-    ]
-};
-
-// --- CYTOSCAPE AYARLARI ---
-const cy = cytoscape({
-    container: document.getElementById('cy'),
-    elements: [
-        ...DATA.nodes.map(n => ({ data: { ...n, weight: n.group === 'Tema' ? 70 : (n.group === 'Kurum' ? 50 : 35) } })),
-        ...DATA.edges.map((e, i) => ({ data: { id: 'e'+i, source: e.source, target: e.target, rel: e.rel } }))
-    ],
-    style: [
-        {
-            selector: 'node',
-            style: {
-                'label': 'data(label)',
-                'color': '#f1f5f9',
-                'font-size': '12px',
-                'font-weight': 500,
-                'text-valign': 'bottom',
-                'text-margin-y': 6,
-                'text-background-color': '#0f172a',
-                'text-background-opacity': 0.7,
-                'text-background-padding': '2px',
-                'width': 'data(weight)',
-                'height': 'data(weight)',
-                'border-width': 2,
-                'border-color': 'rgba(255,255,255,0.1)',
-                'background-color': function(ele){
-                    const g = ele.data('group');
-                    if(g==='Erken') return '#ef4444';
-                    if(g==='Akademi') return '#f59e0b';
-                    if(g==='Monografi') return '#10b981';
-                    if(g==='Teorik') return '#8b5cf6';
-                    if(g==='Kültür') return '#ec4899';
-                    if(g==='Kurum') return '#64748b';
-                    return '#94a3b8';
-                }
-            }
-        },
-        {
-            selector: 'node[group="Tema"]',
-            style: {
-                'shape': 'round-rectangle',
-                'text-valign': 'center',
-                'text-margin-y': 0,
-                'font-size': '13px',
-                'font-weight': 700,
-                'background-color': '#334155',
-                'color': '#fff',
-                'width': 120,
-                'height': 40
-            }
-        },
-        {
-            selector: 'edge',
-            style: {
-                'width': 1.5,
-                'curve-style': 'bezier',
-                'line-color': '#475569',
-                'target-arrow-color': '#475569',
-                'target-arrow-shape': 'triangle',
-                'arrow-scale': 0.8,
-                'opacity': 0.5
-            }
-        },
-        {
-            selector: ':selected',
-            style: {
-                'border-width': 3,
-                'border-color': '#fff',
-                'line-color': '#6366f1',
-                'target-arrow-color': '#6366f1',
-                'source-arrow-color': '#6366f1',
-                'opacity': 1,
-                'z-index': 999
-            }
-        }
-    ],
-    layout: {
-        name: 'cose',
-        animate: true,
-        randomize: false,
-        componentSpacing: 120,
-        nodeRepulsion: 4500,
-        nodeOverlap: 20,
-        idealEdgeLength: 90,
-        gravity: 1
-    }
-});
-
-// --- ETKİLEŞİMLER ---
-
-// Tıklama Olayı
-cy.on('tap', 'node', function(evt){
-    const node = evt.target;
-    const d = node.data();
-    
-    document.getElementById('card-title').textContent = d.label;
-    let metaHtml = '';
-    if(d.year) metaHtml += `<span style="color:#fff; opacity:0.7">${d.year}</span>`;
-    if(d.group) metaHtml += `<span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:11px">${d.group}</span>`;
-    document.getElementById('card-meta').innerHTML = metaHtml;
-    document.getElementById('card-body').innerHTML = d.bio || 'Detaylı bilgi bulunamadı.';
-
-    // Highlight logic
-    cy.elements().removeClass('faded');
-    const neighborhood = node.neighborhood().add(node);
-    cy.elements().difference(neighborhood).animate({
-        style: { opacity: 0.1 }
-    }, { duration: 200 });
-    neighborhood.animate({
-        style: { opacity: 1 }
-    }, { duration: 200 });
-});
-
-// Boşluğa tıklama (Reset)
-cy.on('tap', function(evt){
-    if(evt.target === cy){
-        resetView();
-    }
-});
-
-function resetView(){
-    document.getElementById('card-title').textContent = 'Keşfetmek için tıklayın';
-    document.getElementById('card-meta').textContent = 'Seçili öge yok';
-    document.getElementById('card-body').textContent = 'Haritadaki düğümlere tıklayarak sosyologların biyografilerini, temel tezlerini ve birbirleriyle olan entelektüel ilişkilerini görüntüleyebilirsiniz.';
-    
-    cy.elements().animate({
-        style: { opacity: 1, display: 'element' }
-    }, { duration: 200 });
-}
-
-// Arama
-document.getElementById('search').addEventListener('input', function(e){
-    const val = e.target.value.toLowerCase();
-    if(!val) {
-        cy.elements().style('display', 'element');
-        return;
-    }
-    
-    cy.batch(() => {
-        cy.nodes().forEach(n => {
-            const match = n.data('label').toLowerCase().includes(val) || (n.data('bio')||'').toLowerCase().includes(val);
-            n.style('display', match ? 'element' : 'none');
-        });
-    });
-});
-
-// Kategori Filtreleme
-window.filterBy = function(groupName){
-    cy.batch(() => {
-        cy.nodes().forEach(n => {
-            // Tema ve Kurumlar bağlamı korumak için genelde açık kalmalı, ama filtre katı olsun istenirse kapatılabilir.
-            // Burada sadece seçili grubu ve Temaları açık tutuyoruz.
-            const show = n.data('group') === groupName || n.data('group') === 'Tema';
-            n.style('display', show ? 'element' : 'none');
-        });
-    });
-};
-
-// Butonlar
-document.getElementById('resetBtn').addEventListener('click', () => {
-    cy.elements().style('display', 'element');
-    resetView();
-    cy.layout({ name: 'cose', animate: true }).run();
-});
-
-document.getElementById('fitBtn').addEventListener('click', () => {
-    cy.fit(20);
-});
-
-// Başlangıç
-cy.ready(() => {
-    cy.fit(30);
-});
-
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
- 
