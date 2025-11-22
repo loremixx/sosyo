@@ -1,218 +1,219 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SocioSample | Akademik Örneklem Hesaplayıcı</title>
-    <style>
-        /* Sitenin Görsel Tasarımı (CSS) */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 600px;
-            border-top: 6px solid #2c3e50; /* Akademik Lacivert */
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            text-align: center;
-            margin-bottom: 0.5rem;
-        }
-        p.subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #34495e;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box; /* Kutunun taşmasını engeller */
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #34495e;
-        }
-        
-        /* Sonuç Alanı Tasarımı */
-        #result-area {
-            display: none; /* Başlangıçta gizli */
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px dashed #bdc3c7;
-        }
-        .result-box {
-            background-color: #eaf2f8;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .result-number {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #2980b9;
-            display: block;
-        }
-        .academic-text {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            font-family: 'Times New Roman', Times, serif; /* Tez fontu */
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #333;
-            border-radius: 6px;
-            position: relative;
-        }
-        .copy-btn {
-            background-color: #27ae60;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            padding: 10px;
-        }
-        .copy-btn:hover {
-            background-color: #219150;
-        }
-        .info {
-            font-size: 0.8rem;
-            color: #95a5a6;
-            margin-top: 2rem;
-            text-align: center;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Türkiye Sosyoloji Tarihi — Dijital Harita (Prototype)</title>
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--muted:#9aa6b2;--accent:#4f46e5}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue';background:linear-gradient(180deg,#071024 0%, #071a2a 100%);color:#e6eef6}
+    .app{display:grid;grid-template-columns:1fr 340px;gap:16px;height:100vh;padding:18px}
+    .map{border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(2,6,23,0.6);overflow:hidden}
+    #cy{width:100%;height:100%}
+    .panel{background:linear-gradient(180deg,var(--panel),#071226);border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column}
+    h1{font-size:18px;margin:0 0 8px 0}
+    .muted{color:var(--muted);font-size:13px;margin-bottom:12px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .filters{display:flex;gap:8px;flex-direction:column;margin-bottom:12px}
+    .filter-row{display:flex;gap:8px;align-items:center}
+    .node-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:8px;margin-top:8px}
+    .small{font-size:13px;color:var(--muted)}
+    .btn{padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.04);font-size:12px}
+    footer{margin-top:auto;font-size:12px;color:var(--muted)}
+    .legend{display:flex;gap:8px;flex-wrap:wrap}
+    .legend .item{display:flex;gap:6px;align-items:center}
+    .dot{width:12px;height:12px;border-radius:999px}
+  </style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>SocioSample</h1>
-        <p class="subtitle">Sosyolojik Araştırmalar İçin Örneklem Hesaplama Aracı</p>
-
-        <div class="form-group">
-            <label for="population">Evren Büyüklüğü (N)</label>
-            <input type="number" id="population" placeholder="Örn: 10000" min="1">
-        </div>
-
-        <div class="form-group">
-            <label for="confidence">Güven Aralığı (Confidence Level)</label>
-            <select id="confidence">
-                <option value="1.96" selected>%95 (Standart)</option>
-                <option value="2.58">%99 (Hassas)</option>
-                <option value="1.65">%90 (Düşük)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="error">Hata Payı (Margin of Error)</label>
-            <select id="error">
-                <option value="0.05" selected>%5 (Standart)</option>
-                <option value="0.03">%3 (Hassas)</option>
-                <option value="0.10">%10 (Geniş)</option>
-            </select>
-        </div>
-
-        <button onclick="calculateSample()">Örneklemi Hesapla</button>
-
-        <div id="result-area">
-            <div class="result-box">
-                <span>Görüşülmesi Gereken Kişi Sayısı:</span>
-                <span class="result-number" id="final-number">0</span>
-            </div>
-
-            <label>Tez/Rapor İçin Akademik Metin:</label>
-            <div class="academic-text" id="thesis-text">
-                </div>
-            <button class="copy-btn" onclick="copyText()">Metni Kopyala</button>
-        </div>
-        
-        <div class="info">
-            Hesaplama Cochran (1977) formülü kullanılarak yapılmıştır.<br>
-            p=0.5 (Maksimum heterojenlik varsayımı).
-        </div>
+  <div class="app">
+    <div class="map">
+      <div id="cy"></div>
     </div>
+    <div class="panel">
+      <h1>Türkiye Sosyoloji Tarihi — Prototip</h1>
+      <div class="muted">İlk prototip: etkileşimli ağ haritası. Düğüme tıklayın, sağda ayrıntıları görün.</div><div class="controls">
+    <input id="search" type="text" placeholder="Kişi / kurum ara (örn: Şerif Mardin)" />
+  </div>
 
-    <script>
-        /* Sitenin Beyni (JavaScript) */
-        function calculateSample() {
-            // Girdileri al
-            const N = document.getElementById('population').value; // Evren
-            const Z = parseFloat(document.getElementById('confidence').value); // Z değeri
-            const e = parseFloat(document.getElementById('error').value); // Hata payı
-            const p = 0.5; // Heterojenlik (Standart 0.5 alınır)
+  <div class="filters">
+    <div class="small">Temalara göre filtrele</div>
+    <div class="filter-row">
+      <label><input type="checkbox" class="theme-checkbox" value="Modernleşme" checked /> Modernleşme</label>
+    </div>
+    <div class="filter-row">
+      <label><input type="checkbox" class="theme-checkbox" value="Din" checked /> Din</label>
+    </div>
+    <div class="filter-row">
+      <label><input type="checkbox" class="theme-checkbox" value="Kent" checked /> Kent</label>
+    </div>
+    <div class="filter-row">
+      <label><input type="checkbox" class="theme-checkbox" value="Sınıf" checked /> Sınıf</label>
+    </div>
+    <div class="filter-row">
+      <label><input type="checkbox" class="theme-checkbox" value="Ekol" checked /> Ekol / Teori</label>
+    </div>
+  </div>
 
-            // Boş alan kontrolü
-            if (N === "" || N <= 0) {
-                alert("Lütfen geçerli bir evren büyüklüğü giriniz.");
-                return;
-            }
+  <div id="card" class="node-card">
+    <div id="card-title" style="font-weight:600">Haritadan bir düğüm seçin</div>
+    <div id="card-meta" class="small">Seçim olmadığında kısa açıklama görünür.</div>
+    <div id="card-body" style="margin-top:8px;font-size:14px;color:#dfeaf6">Seçilen düğümün akademik biyografisi, ana eserleri ve ilişkileri burada gösterilecek.</div>
+  </div>
 
-            // Cochran Formülü (Sonlu Evren Düzeltmeli)
-            // n0 = (Z^2 * p * q) / e^2
-            const numerator = (Math.pow(Z, 2) * p * (1 - p)) / Math.pow(e, 2);
-            
-            // n = n0 / (1 + (n0 - 1) / N)
-            const sampleSize = numerator / (1 + ((numerator - 1) / N));
-            
-            // Sonucu yukarı yuvarla (İnsan yarım olamaz)
-            const finalResult = Math.ceil(sampleSize);
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button id="exportBtn" class="btn">Veriyi JSON indir</button>
+    <button id="resetBtn" class="btn" style="background:#334155">Düğümleri resetle</button>
+  </div>
 
-            // Sonuçları ekrana yaz
-            document.getElementById('final-number').innerText = finalResult;
+  <div style="margin-top:12px">
+    <div class="small">Efsanevi kısa liste (ilk prototip):</div>
+    <div class="legend" style="margin-top:8px">
+      <div class="item"><span class="dot" style="background:#ef4444"></span><span class="small">Modernleşme</span></div>
+      <div class="item"><span class="dot" style="background:#f59e0b"></span><span class="small">Din</span></div>
+      <div class="item"><span class="dot" style="background:#10b981"></span><span class="small">Kent</span></div>
+      <div class="item"><span class="dot" style="background:#60a5fa"></span><span class="small">Sınıf</span></div>
+      <div class="item"><span class="dot" style="background:#a78bfa"></span><span class="small">Ekol</span></div>
+    </div>
+  </div>
 
-            // Akademik metni oluştur
-            const confidenceText = document.getElementById('confidence').options[document.getElementById('confidence').selectedIndex].text;
-            const errorText = document.getElementById('error').options[document.getElementById('error').selectedIndex].text;
-            
-            const text = `Bu araştırmanın evreni ${N} birimden oluşmaktadır. Evrenin heterojen yapıda olduğu varsayılarak (p=0.5), ${confidenceText} güven düzeyinde ve ${errorText} hata payı ile yapılan güç analizi sonucunda, evreni temsil edecek minimum örneklem büyüklüğü ${finalResult} olarak hesaplanmıştır. Hesaplamada sonlu evren düzeltmesi uygulanmıştır (Cochran, 1977).`;
+  <footer>
+    Prototype — veri kaynakları ve etik: anonimleştirme, referans gösterimi, lisans notu eklenecek.
+  </footer>
+</div>
 
-            document.getElementById('thesis-text').innerText = text;
+  </div>  <script>
+    // --- İlk veri: 20 düğüm + kenarlar (örnek prototip) ---
+    const DATA = {
+      nodes: [
+        { id: 'ziyag', label: 'Ziya Gökalp', type: 'Kişi', year: '1876–1924', themes:['Modernleşme','Ekol'] , bio: 'Türk sosyolojisinin kurucu figürlerinden. Milliyetçilik ve toplum kuramları.' },
+        { id: 'hilmi', label: 'Hilmi Ziya Ülken', type: 'Kişi', year:'1889–1957', themes:['Ekol','Modernleşme'], bio:'Tarih ve sosyoloji arasındaki bağlantıları kuran aydınlardan.'},
+        { id: 'mardin', label: 'Şerif Mardin', type: 'Kişi', year:'1927–2017', themes:['Din','Ekol'], bio:'Dönem, aidiyet ve devlet-toplum ilişkileri üzerine çalıştı.'},
+        { id: 'biran', label: 'Behice Boran', type: 'Kişi', year:'1900–1987', themes:['Sınıf'], bio:'Siyasal sosyoloji ve işçi hareketleri üzerine çalışmalarıyla bilinir.'},
+        { id: 'tutengil', label: 'Cavit Orhan Tütengil', type: 'Kişi', year:'1921–1979', themes:['Kent'], bio:'Kent sosyolojisi ve kalkınma eleştirileri.'},
+        { id: 'mubec', label: 'Mübeccel Belik Kıray', type: 'Kişi', year:'1920–2005', themes:['Kent'], bio:'Kırsal ve kent arasındaki geçişe dair çalışmalar.'},
+        { id: 'erdem', label: 'İsmail Erdem (örnek)', type:'Kişi', year:'1950–', themes:['Din','Modernleşme'], bio:'Örnek araştırmacı; detay ileride doldurulacak.'},
+        { id: 'univ_istanbul', label: 'İstanbul Ü. Sosyoloji', type:'Kurum', year:'1940s–', themes:[], bio:'İstanbul Üniversitesi sosyoloji ana disiplini.'},
+        { id: 'univ_ankara', label: 'Ankara Ü. DTCF', type:'Kurum', year:'1930s–', themes:[], bio:'DTCF sosyoloji eğitiminin merkezi.'},
+        { id: 'toplum', label: 'Toplum ve Bilim (dergi)', type:'Kurum', year:'1970s–', themes:['Ekol'], bio:'Türkiye sol düşüncesinin akademik yayınlarından biri.'},
+        { id: 'modern', label: 'Modernleşme Akımı', type:'Tema', themes:['Modernleşme'], bio:'Türkiye sosyolojisinde modernleşme paradigması.'},
+        { id: 'dinTema', label: 'Din Çalışmaları', type:'Tema', themes:['Din'] , bio:'Dindarlık, laiklik ve toplum ilişkileri.'},
+        { id: 'kentTema', label: 'Kentleşme', type:'Tema', themes:['Kent'], bio:'Gecekondulaşma, kent kültürü ve politika.'},
+        { id: 'sinifTema', label: 'Sınıf ve Emek', type:'Tema', themes:['Sınıf'], bio:'İşçi hareketleri, sınıf bilinci.'},
+        { id: 'ekolTema', label: 'Ekol ve Teori', type:'Tema', themes:['Ekol'], bio:'Yapısal işlevselcilik, eleştirel teori, vs.'},
+        { id: 'z1', label: 'Ziya Gökalp → Modernleşme', type:'edge', edge:true},
+        // edges as objects will be added below properly
+      ],
+      edges: [
+        { id: 'e1', source: 'ziyag', target: 'modern', rel:'influenced', weight:3},
+        { id: 'e2', source: 'mardin', target: 'dinTema', rel:'wrote_on', weight:3},
+        { id: 'e3', source: 'tutengil', target: 'kentTema', rel:'wrote_on', weight:2},
+        { id: 'e4', source: 'mubec', target: 'kentTema', rel:'wrote_on', weight:2},
+        { id: 'e5', source: 'biran', target: 'sinifTema', rel:'wrote_on', weight:3},
+        { id: 'e6', source: 'univ_istanbul', target: 'ziyag', rel:'educated', weight:1},
+        { id: 'e7', source: 'univ_ankara', target: 'mardin', rel:'worked_at', weight:1},
+        { id: 'e8', source: 'toplum', target: 'ekolTema', rel:'published', weight:2}
+      ]
+    };
 
-            // Sonuç alanını görünür yap
-            document.getElementById('result-area').style.display = "block";
+    // --- Map dataset conversion for cytoscape ---
+    function toCytoscape(data){
+      const elements = [];
+      data.nodes.forEach(n=>{
+        if(n.type === 'Kişi' || n.type === 'Kurum' || n.type === 'Tema'){
+          elements.push({
+            data: { id: n.id, label: n.label, type: n.type, year: n.year||'', themes: n.themes||[], bio: n.bio||'' }
+          });
         }
+      });
+      data.edges.forEach(e=>{
+        elements.push({ data: { id: e.id, source: e.source, target: e.target, rel: e.rel, weight: e.weight } });
+      });
+      return elements;
+    }
 
-        // Metni Kopyalama Fonksiyonu
-        function copyText() {
-            const text = document.getElementById('thesis-text').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Akademik metin kopyalandı! Tez dosyanıza yapıştırabilirsiniz.");
-            });
-        }
-    </script>
+    const cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: toCytoscape(DATA),
+      style: [
+        { selector: 'node', style: { 'label': 'data(label)', 'text-valign':'center', 'text-halign':'center', 'color':'#e6eef6', 'font-size':10, 'background-color': function(ele){
+          const themes = ele.data('themes')||[];
+          if(themes.includes('Modernleşme')) return '#ef4444';
+          if(themes.includes('Din')) return '#f59e0b';
+          if(themes.includes('Kent')) return '#10b981';
+          if(themes.includes('Sınıf')) return '#60a5fa';
+          if(themes.includes('Ekol')) return '#a78bfa';
+          return '#94a3b8';
+        }},
+        },
+        { selector: 'edge', style: { 'width': 'mapData(weight, 1, 5, 1, 6)', 'line-color':'#1f2937', 'curve-style':'bezier', 'target-arrow-shape':'triangle', 'target-arrow-color':'#1f2937' } }
+      ],
+      layout: { name: 'cose', animate: true }
+    });
 
-</body>
-</html>
+    // --- Interaction: click node to show card ---
+    cy.on('tap', 'node', function(evt){
+      const node = evt.target;
+      const d = node.data();
+      document.getElementById('card-title').textContent = d.label + (d.year? ' — '+d.year : '');
+      document.getElementById('card-meta').textContent = d.type + (d.themes && d.themes.length? ' • '+d.themes.join(', ') : '');
+      document.getElementById('card-body').textContent = d.bio || 'Detay yok.';
+    });
+
+    // deselect -> reset card
+    cy.on('tap', function(evt){
+      if(evt.target === cy){
+        document.getElementById('card-title').textContent = 'Haritadan bir düğüm seçin';
+        document.getElementById('card-meta').textContent = 'Seçim olmadığında kısa açıklama görünür.';
+        document.getElementById('card-body').textContent = 'Seçilen düğümün akademik biyografisi, ana eserleri ve ilişkileri burada gösterilecek.';
+      }
+    });
+
+    // --- Search box ---
+    document.getElementById('search').addEventListener('input', function(e){
+      const q = e.target.value.toLowerCase().trim();
+      if(!q){ cy.nodes().style('opacity',1); return; }
+      cy.nodes().forEach(n=>{
+        const match = n.data('label').toLowerCase().includes(q);
+        n.style('opacity', match?1:0.12);
+      });
+    });
+
+    // --- Theme filters ---
+    function applyFilters(){
+      const checked = Array.from(document.querySelectorAll('.theme-checkbox:checked')).map(i=>i.value);
+      if(checked.length===0){ cy.nodes().style('display','none'); return; }
+      cy.nodes().forEach(n=>{
+        const themes = n.data('themes') || [];
+        // show node if any theme matches OR if node type is Kurum (show always)
+        const isKurum = n.data('type') === 'Kurum';
+        const show = isKurum || themes.length===0 || themes.some(t=>checked.includes(t));
+        n.style('display', show ? 'element' : 'none');
+      });
+    }
+    document.querySelectorAll('.theme-checkbox').forEach(cb=>cb.addEventListener('change', applyFilters));
+
+    // --- Export JSON ---
+    document.getElementById('exportBtn').addEventListener('click', function(){
+      const data = { nodes: [], edges: [] };
+      cy.nodes().forEach(n=>{ data.nodes.push(n.data()); });
+      cy.edges().forEach(e=>{ data.edges.push(e.data()); });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'sosyoloji_map_data.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // --- Reset layout ---
+    document.getElementById('resetBtn').addEventListener('click', function(){
+      cy.layout({ name: 'cose', animate: true }).run();
+      cy.nodes().style('opacity',1); document.getElementById('search').value = '';
+    });
+
+    // --- polishing: fit view on load ---
+    cy.ready(()=>{ cy.fit(); });
+  </script></body>
+    </html>
